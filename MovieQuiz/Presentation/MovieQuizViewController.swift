@@ -3,13 +3,15 @@ import UIKit
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - IB Outlets
+    
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet weak var yesButton: UIButton!
     @IBOutlet weak var noButton: UIButton!
-    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // MARK: - Private Properties
+    
     private var questionsAmount: Int = 0
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
@@ -17,23 +19,41 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var correctAnswers = 0
     weak var delegate: QuestionFactoryDelegate?
     private var alertPresenter = AlertPresenter()
-    private var statisticService = StatisticService()
+    private var statisticService: StatisticServiceProtocol = StatisticService()
 
     // MARK: - Overrides Methods
     func setup(delegate: QuestionFactoryDelegate) {
         self.delegate = delegate
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
-        self.questionFactory = questionFactory
-        questionsAmount = questionFactory.getTotalQuestionsCount()
-        questionFactory.requestNextQuestion()
-        alertPresenter.viewController = self
+        showLoadingIndicator()
+        setupUI()
+        setupDependencies()
     }
     
+    // MARK: - Setup
+    
+    private func setupDependencies() {
+        let moviesLoader = MoviesLoader()
+        let factory = QuestionFactory(delegate: self, moviesLoader: moviesLoader)
+        alertPresenter.viewController = self
+        questionsAmount = 10
+        questionFactory = factory
+        questionFactory?.loadData()
+      }
+    
+    private func setupUI() {
+        imageView.layer.cornerRadius = 20
+        imageView.layer.masksToBounds = true
+    }
+    
+    private func loadFirstQuestion() {
+        questionFactory?.requestNextQuestion()
+    }
     
     // MARK: - IB Actions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
@@ -60,10 +80,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel( image: UIImage(named: model.image) ?? UIImage(),
-                                              question: model.text,
-                                              questionNumber: "\(currentQuestionIndex + 1) / \(questionsAmount)")
-        return questionStep }
+        let image = UIImage(data: model.image)
+        return QuizStepViewModel(image: image ?? UIImage(), question: model.text, questionNumber: "\(currentQuestionIndex + 1)/10")
+    }
     
     
    
@@ -77,6 +96,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
+        
+        print(step.image.size)
     
     }
     
@@ -105,9 +126,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
 
     private func showNextQuestionOrResults() {
-        
-        if currentQuestionIndex < (questionFactory?.getTotalQuestionsCount() ?? 0) - 1 {
-            currentQuestionIndex += 1
+        currentQuestionIndex += 1
+        if currentQuestionIndex < 10 {
             questionFactory?.requestNextQuestion()
         } else {
             statisticService.store(correct: correctAnswers, total: questionsAmount)
@@ -130,12 +150,34 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             ) {
                 self.currentQuestionIndex = 0
                 self.correctAnswers = 0
-                self.questionFactory?.resetQuestions()
+                self.questionFactory?.loadData()
                 self.questionFactory?.requestNextQuestion()
             }
             
-            alertPresenter.showAlert(quiz: model)
+            alertPresenter.showAlert(model: model)
         }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func showNetworkError(message: String) {
+        activityIndicator.isHidden = true
+        
+        let model = AlertModel(
+            title: "Ошибка",
+            message: message,
+            buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            self.questionFactory?.requestNextQuestion()
+        }
+        
+        alertPresenter.showAlert(model: model)
     }
     
     //MARK: Delegate Method
@@ -147,5 +189,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         show(quiz: viewModel)
+    }
+    
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
     }
 }

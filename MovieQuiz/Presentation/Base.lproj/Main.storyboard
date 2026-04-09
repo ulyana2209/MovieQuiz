@@ -108,18 +108,26 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="8XX-tq-fzl">
+                                <rect key="frame" x="186.66666666666666" y="416" width="20" height="20"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="color" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
+                            <constraint firstItem="8XX-tq-fzl" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="5B8-a3-YSQ"/>
                             <constraint firstItem="Kcj-pa-wWy" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="HcG-gJ-tVd"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Kcj-pa-wWy" secondAttribute="bottom" id="Hze-Wy-yUg"/>
+                            <constraint firstItem="8XX-tq-fzl" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="bNv-H0-GDX"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="el8-pJ-Kkx" secondAttribute="trailing" constant="20" id="iC3-DN-ljS"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Kcj-pa-wWy" secondAttribute="trailing" constant="20" id="mEB-6e-UVL"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="top" secondItem="Kcj-pa-wWy" secondAttribute="top" constant="10" id="xEJ-cB-tQm"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="8XX-tq-fzl" id="fp4-0Q-DNm"/>
                         <outlet property="counterLabel" destination="o5u-Ij-gJN" id="kCY-Lj-R2u"/>
                         <outlet property="imageView" destination="OxA-gk-tNE" id="psf-fi-8lU"/>
                         <outlet property="noButton" destination="m2c-Q6-TJW" id="qbQ-kC-mgF"/>

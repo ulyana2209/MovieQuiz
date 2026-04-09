@@ -6,11 +6,16 @@
 //
 
 import UIKit
+
 final class AlertPresenter {
+    
+    // MARK: - Properties
     
   weak var viewController: UIViewController?
     
-    func showAlert(quiz result: AlertModel) {
+    // MARK: - Public Methods
+    
+    func showAlert(model result: AlertModel) {
         let alert = UIAlertController(
             title: result.title,
             message: result.message,
