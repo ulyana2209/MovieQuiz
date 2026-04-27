@@ -97,7 +97,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             let result = makeResultsMessage()
-            let model = AlertModel(title: "Раунд окончен!", message: result, buttonText: "Начать заново") {
+            let model = AlertModel(title: "Раунд окончен!", message: result, buttonText: "Сыграть ещё раз") {
                 self.restartGame()
             }
             alertPresenter.showAlert(model: model)
